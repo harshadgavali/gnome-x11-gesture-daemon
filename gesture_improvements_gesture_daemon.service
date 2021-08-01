@@ -1,0 +1,10 @@
+[Unit]
+Requires=dbus.service
+Description=gesture improvements Gesture Daemon
+StartLimitInterval=0
+
+[Service]
+Type=simple
+ExecStart=@HOME/.local/bin/gesture_improvements_gesture_daemon
+Restart=always
+RestartSec=1s
