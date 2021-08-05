@@ -11,6 +11,10 @@ grep -E '^input:' /usr/lib/group | sudo tee -a /etc/group
 sudo usermod -aG input $USER
 ```
 
+## From releases
+- Download zip file from [releases](https://github.com/harshadgavali/gnome-x11-gesture-daemon/releases)
+- Extract zip file
+- Run `sh install.sh` inside extracted folder
 
 ## Build from source
 
