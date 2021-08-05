@@ -10,6 +10,7 @@ env:
 
 jobs:
   Release:
+    if: github.event.base_ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -18,7 +19,7 @@ jobs:
       id: zipName
       run: |
         echo "::set-output name=tagname::${GITHUB_REF#refs/*/}"
-        echo "::set-output name=filename::'gnome-x11-gesture-daemon.${GITHUB_REF#refs/*/}'"
+        echo "::set-output name=filename::'gnome-x11-gesture-daemon.${GITHUB_REF#refs/*/}.zip'"
 
     - name: Install dependencies
       run: sudo apt update && sudo apt install -y libinput-dev

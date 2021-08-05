@@ -2,7 +2,9 @@ name: Pre release
 
 on:
   push:
-    branches: [ main, dev ]
+    branches:
+    - main
+    - dev
 
 env:
   CARGO_TERM_COLOR: always
