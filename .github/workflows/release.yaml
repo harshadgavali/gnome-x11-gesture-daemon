@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  Release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set variables
+      id: zipName
+      run: |
+        echo "::set-output name=tagname::${GITHUB_REF#refs/*/}"
+        echo "::set-output name=filename::'gnome-x11-gesture-daemon.${GITHUB_REF#refs/*/}'"
+
+    - name: Install dependencies
+      run: sudo apt update && sudo apt install -y libinput-dev
+    - name: Build
+      run: cargo build --release
+    
+    - name: Create Zip
+      run: |
+        zip "${{ steps.zipName.outputs.filename }}" \
+        target/release/gesture_improvements_gesture_daemon \
+        install.sh \
+        gesture_improvements_gesture_daemon.service
+    
+    - name: Automatic Releases
+      uses: marvinpinto/action-automatic-releases@v1.2.1
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        automatic_release_tag: "${{ steps.zipName.outputs.tagname }}"
+        files: "${{ steps.zipName.outputs.filename }}"
