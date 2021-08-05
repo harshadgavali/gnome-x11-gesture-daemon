@@ -16,14 +16,14 @@ sudo usermod -aG input $USER
 - Extract zip file
 - Run `sh install.sh` inside extracted folder
 
-## Build from source
+### Build from source
 
-### Using docker/podman
+#### Using docker/podman
 ```
 make build-docker && make install
 ```
 
-### Without docker/podman
+#### Without docker/podman
 * First install build dependencies
 ```
 # dnf/rpm based distributions
