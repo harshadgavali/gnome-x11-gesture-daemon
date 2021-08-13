@@ -35,3 +35,8 @@ sudo apt install libinput-dev
 ```
 make build && make install
 ```
+
+# Thanks
+[@Smithay](https://github.com/Smithay) for [rust bindings](https://crates.io/crates/input)  for libinput
+
+[FreeDesktop/Dbus Project](https://gitlab.freedesktop.org/dbus/) for [Rust API](https://crates.io/crates/zbus) for D-Bus.
