@@ -18,6 +18,9 @@ sudo usermod -aG input $USER
 ```
 # Without sudo/root
 sh install.sh
+
+# Restart system for changes to take an effect
+# After restart service will be automatically started by extension
 ```
 
 ### Build from source
@@ -42,10 +45,14 @@ make build && make install
 ```
 
 ### Troubleshooting
-Run following command to check if service is running properly (It should be running on X11).
+- First make sure you've restarted your system after installing.
+
+- Run following command to check if service is running properly (It should be running on X11).
 ```
 systemctl --user status gesture_improvements_gesture_daemon.service
 ```
+
+- Open issue on github, with output of the above command
 ### Uninstallation
 ```
 # Without sudo/root
