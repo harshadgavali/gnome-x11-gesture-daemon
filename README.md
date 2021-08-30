@@ -14,6 +14,7 @@ sudo usermod -aG input $USER
 ## From releases
 - Download zip file from [releases](https://github.com/harshadgavali/gnome-x11-gesture-daemon/releases)
 - Extract zip file
+- chmod +x install.sh
 - Run `sh install.sh` inside extracted folder
 
 *Dont run install.sh as root*
