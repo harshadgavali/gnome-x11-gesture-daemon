@@ -51,6 +51,10 @@ systemctl --user status gesture_improvements_gesture_daemon.service
 # Without sudo/root
 sh ./uninstall.sh
 ```
+
+# Contributors
+[Swastik Dwivedi](https://github.com/drunckj)
+
 # Thanks
 [@Smithay](https://github.com/Smithay) for [rust bindings](https://crates.io/crates/input)  for libinput
 
