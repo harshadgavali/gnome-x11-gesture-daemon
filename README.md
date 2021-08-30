@@ -45,7 +45,11 @@ make build && make install
 systemctl --user status gesture_improvements_gesture_daemon.service
 ```
 if it says not running then : ```systemctl --user start gesture_improvements_gesture_daemon.service```
-
+## Uninstallation
+```
+chmod +x uninstall.sh
+sh ./uninstall.sh
+```
 # Thanks
 [@Smithay](https://github.com/Smithay) for [rust bindings](https://crates.io/crates/input)  for libinput
 
