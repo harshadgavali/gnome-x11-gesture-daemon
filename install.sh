@@ -17,7 +17,7 @@ printf '\t\e[1;34m%-6s\e[m\n' "Service is activated.\nIf your gestures still don
 printf '\t\e[1;31m%-6s\e[m\n' "sudo usermod -aG input $USER"
 printf '\t\e[1;34m%-6s\e[m\n' "Reboot and it should work."
 else
-printf '\t\e[1;33m%-6s\e[m\n' "Service isnt started. Check systemctl --user start gesture_improvements_gesture_daemon.service for more info"
+printf '\t\e[1;33m%-6s\e[m\n' "Service isnt started. Check systemctl --user status gesture_improvements_gesture_daemon.service for more info"
 fi
 
 
