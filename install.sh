@@ -21,4 +21,3 @@ printf '\t\e[1;33m%-6s\e[m\n' "Service isnt started. Check systemctl --user stat
 fi
 
 
-
