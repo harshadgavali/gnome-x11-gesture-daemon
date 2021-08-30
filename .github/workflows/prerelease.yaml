@@ -32,6 +32,7 @@ jobs:
           zip "${{ steps.zipName.outputs.filename }}" \
           target/release/gesture_improvements_gesture_daemon \
           install.sh \
+          uninstall.sh \
           gesture_improvements_gesture_daemon.service
 
       - name: Automatic Releases
