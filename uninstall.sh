@@ -1,4 +1,5 @@
 #!/bin/sh
-systemctl --user stop gesture_improvements_gesture_daemon.service
-sudo rm  ~/.config/systemd/user/gesture_improvements_gesture_daemon.service
-sudo rm  ~/.local/bin/gesture_improvements_gesture_daemon
+echo "Uninstalling ..."
+rm -v ~/.config/systemd/user/gesture_improvements_gesture_daemon.service
+rm -v ~/.local/bin/gesture_improvements_gesture_daemon
+echo "Uninstalled ..."
