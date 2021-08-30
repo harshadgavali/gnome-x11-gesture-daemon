@@ -11,10 +11,14 @@ grep -E '^input:' /usr/lib/group | sudo tee -a /etc/group
 sudo usermod -aG input $USER
 ```
 
-## From releases
+### **From releases (Recommended)**
 - Download zip file from [releases](https://github.com/harshadgavali/gnome-x11-gesture-daemon/releases)
 - Extract zip file
-- Run `sh install.sh` inside extracted folder
+- Inside extracted folder, Run 
+```
+# Without sudo/root
+sh install.sh
+```
 
 ### Build from source
 
@@ -28,6 +32,7 @@ make build-docker && make install
 ```
 # dnf/rpm based distributions
 sudo dnf install libinput-devel
+
 # apt/deb based distributions
 sudo apt install libinput-dev
 ```
@@ -36,6 +41,16 @@ sudo apt install libinput-dev
 make build && make install
 ```
 
+### Troubleshooting
+Run following command to check if service is running properly (It should be running on X11).
+```
+systemctl --user status gesture_improvements_gesture_daemon.service
+```
+### Uninstallation
+```
+# Without sudo/root
+sh ./uninstall.sh
+```
 # Thanks
 [@Smithay](https://github.com/Smithay) for [rust bindings](https://crates.io/crates/input)  for libinput
 
