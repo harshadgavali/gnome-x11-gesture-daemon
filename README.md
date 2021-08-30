@@ -15,6 +15,7 @@ sudo usermod -aG input $USER
 - Download zip file from [releases](https://github.com/harshadgavali/gnome-x11-gesture-daemon/releases)
 - Extract zip file
 - Run `sh install.sh` inside extracted folder
+*Dont run install.sh as root*
 
 ### Build from source
 
@@ -35,6 +36,12 @@ sudo apt install libinput-dev
 ```
 make build && make install
 ```
+
+## Troubleshooting
+```
+systemctl --user status gesture_improvements_gesture_daemon.service
+```
+if it says not running then : ```systemctl --user start gesture_improvements_gesture_daemon.service```
 
 # Thanks
 [@Smithay](https://github.com/Smithay) for [rust bindings](https://crates.io/crates/input)  for libinput
