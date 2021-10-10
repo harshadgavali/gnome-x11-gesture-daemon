@@ -77,6 +77,7 @@ pub fn libinput_listener(transmitter: mpsc::Sender<CustonSwipeEvent>) {
                     GestureSwipeEvent::Begin(_) => "Begin",
                     GestureSwipeEvent::Update(_) => "Update",
                     GestureSwipeEvent::End(_) => "End",
+                    _ => panic!("Unkown gesture event {:?}", swipe),
                 };
 
                 let fingers;
