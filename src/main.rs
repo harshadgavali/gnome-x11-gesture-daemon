@@ -12,7 +12,10 @@ struct Greeter {}
 #[dbus_interface(name = "org.gestureImprovements.gestures")]
 impl Greeter {
     #[dbus_interface(signal)]
-    fn touchpad_swipe(&self, event: &libinput::CustonSwipeEvent) -> zbus::Result<()>;
+    fn touchpad_swipe(&self, event: &libinput::CustomSwipeEvent) -> zbus::Result<()>;
+
+    #[dbus_interface(signal)]
+    fn touchpad_hold(&self, event: &libinput::CustomHoldEvent) -> zbus::Result<()>;
 }
 
 fn main() {
@@ -57,11 +60,10 @@ fn main() {
 
         match msg {
             Ok(msg) => {
-                // println!("greeted everyone!, {:?}", msg);
                 object_server
-                    .with(path, move |iface: &Greeter| {
-                        iface.touchpad_swipe(&msg).unwrap();
-                        return Ok(());
+                    .with(path, move |iface: &Greeter| match &msg {
+                        libinput::CustomGestureEvent::Hold(hold) => iface.touchpad_hold(hold),
+                        libinput::CustomGestureEvent::Swipe(swipe) => iface.touchpad_swipe(swipe),
                     })
                     .unwrap();
                 msg_recv += 1;
