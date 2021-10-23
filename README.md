@@ -17,10 +17,11 @@ sudo usermod -aG input $USER
 - Inside extracted folder, Run 
 ```
 # Without sudo/root
-sh install.sh
+sh install.sh # Reboot is needed after this
 
-# Restart system for changes to take an effect
-# After restart service will be automatically started by extension
+# ** OR ** to restart daemon, without rebooting
+sh install.sh --restart
+
 ```
 
 ### Build from source
