@@ -35,5 +35,5 @@ jobs:
       - name: Upload archive artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ steps.zipName.outputs.filename }}"
-          path: ${{ steps.zipName.outputs.filename }}"
+          name: ${{ steps.zipName.outputs.filename }}
+          path: ${{ steps.zipName.outputs.filename }}

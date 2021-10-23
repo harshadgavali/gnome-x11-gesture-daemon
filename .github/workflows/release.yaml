@@ -34,10 +34,16 @@ jobs:
           uninstall.sh \
           gesture_improvements_gesture_daemon.service
 
+      - name: Upload archive artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.zipName.outputs.filename }}
+          path: ${{ steps.zipName.outputs.filename }}
+
       - name: Automatic Releases
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
-          automatic_release_tag: "${{ steps.zipName.outputs.tagname }}"
-          files: "${{ steps.zipName.outputs.filename }}"
+          automatic_release_tag: ${{ steps.zipName.outputs.tagname }}
+          files: ${{ steps.zipName.outputs.filename }}
