@@ -18,7 +18,7 @@ jobs:
 
       - name: Create ZipFile Name
         id: zipName
-        run: echo "::set-output name=filename::'gnome-x11-gesture-daemon.$(date --iso-8601).$(git rev-parse --short HEAD).zip'"
+        run: echo "::set-output name=filename::gnome-x11-gesture-daemon.$(date --iso-8601).$(git rev-parse --short HEAD).zip"
       - name: Install dependencies
         run: sudo apt update && sudo apt install -y libinput-dev
       - name: Build
