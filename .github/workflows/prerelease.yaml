@@ -3,7 +3,7 @@ name: Pre release
 on:
   push:
     branches:
-      - main
+      - "*"
     paths-ignore:
       - README.md
 
@@ -32,10 +32,8 @@ jobs:
           uninstall.sh \
           gesture_improvements_gesture_daemon.service
 
-      - name: Automatic Releases
-        uses: marvinpinto/action-automatic-releases@v1.2.1
+      - name: Upload archive artifact
+        uses: actions/upload-artifact@v2
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: true
-          automatic_release_tag: "git_release"
-          files: "${{ steps.zipName.outputs.filename }}"
+          name: ${{ steps.zipName.outputs.filename }}"
+          path: ${{ steps.zipName.outputs.filename }}"
