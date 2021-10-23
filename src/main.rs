@@ -18,7 +18,31 @@ impl Greeter {
     fn touchpad_hold(&self, event: &libinput::CustomHoldEvent) -> zbus::Result<()>;
 }
 
+fn display_info(arguments: Vec<String>) {
+    const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
+    const COMMIT: Option<&'static str> = option_env!("GIT_HEAD_SHA");
+
+    match arguments[1].as_str() {
+        "--version" => {
+            println!("version: {}", VERSION.unwrap_or("unknown"));
+            if let Some(commit) = COMMIT {
+                println!("commit: {}", commit)
+            }
+        }
+
+        _ => {
+            println!("unknown args, {:?}", arguments);
+        }
+    }
+}
+
 fn main() {
+    let arguments: Vec<String> = std::env::args().collect();
+    if arguments.len() > 1 {
+        display_info(arguments);
+        return;
+    }
+
     let (transmitter, reciever) = mpsc::channel();
 
     let connection = zbus::Connection::new_session().unwrap();

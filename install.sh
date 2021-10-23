@@ -13,7 +13,7 @@ echo "Make sure to add user to 'input' group."
 echo "Run 'sudo usermod -aG input \$USER' to add user to 'input' group."
 echo ""
 
-if [[ "$1" = "--restart" ]]; then
+if [ "$1" = "--restart" ]; then
     systemctl --user daemon-reload
     systemctl --user stop gesture_improvements_gesture_daemon.service
     systemctl --user start gesture_improvements_gesture_daemon.service

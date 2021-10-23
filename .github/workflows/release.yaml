@@ -24,7 +24,9 @@ jobs:
       - name: Install dependencies
         run: sudo apt update && sudo apt install -y libinput-dev
       - name: Build
-        run: cargo build --release
+        run: |
+          export GIT_HEAD_SHA=$(git rev-parse HEAD)
+          cargo build --release
 
       - name: Create Zip
         run: |
