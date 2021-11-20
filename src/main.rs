@@ -19,6 +19,11 @@ impl Greeter {
 
     #[dbus_interface(signal)]
     fn touchpad_pinch(&self, event: &libinput::CustomPinchEvent) -> zbus::Result<()>;
+
+    fn get_version(&mut self) -> String {
+        const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
+        VERSION.unwrap_or("unknown").into()
+    }
 }
 
 fn display_info(arguments: Vec<String>) {
@@ -34,7 +39,13 @@ fn display_info(arguments: Vec<String>) {
         }
 
         _ => {
-            println!("unknown args, {:?}", arguments);
+            println!(
+                "Unknown argument: {:}\n\
+                Supported arguments:\n\
+                 \t--version\tdisplay version information\n\
+                \nRun without arguments to start dbus service",
+                &arguments[1 .. arguments.len()].join(" ")
+            );
         }
     }
 }
