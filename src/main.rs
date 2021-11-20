@@ -16,6 +16,9 @@ impl Greeter {
 
     #[dbus_interface(signal)]
     fn touchpad_hold(&self, event: &libinput::CustomHoldEvent) -> zbus::Result<()>;
+
+    #[dbus_interface(signal)]
+    fn touchpad_pinch(&self, event: &libinput::CustomPinchEvent) -> zbus::Result<()>;
 }
 
 fn display_info(arguments: Vec<String>) {
@@ -88,6 +91,7 @@ fn main() {
                     .with(path, move |iface: &Greeter| match &msg {
                         libinput::CustomGestureEvent::Hold(hold) => iface.touchpad_hold(hold),
                         libinput::CustomGestureEvent::Swipe(swipe) => iface.touchpad_swipe(swipe),
+                        libinput::CustomGestureEvent::Pinch(pinch) => iface.touchpad_pinch(pinch),
                     })
                     .unwrap();
                 msg_recv += 1;

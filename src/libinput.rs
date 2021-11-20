@@ -6,12 +6,14 @@ use std::{
 };
 
 use input::{
-    event::gesture::GestureSwipeEvent,
-    event::Event,
-    event::{gesture::GestureHoldEvent, GestureEvent},
+    event::{
+        gesture::{GestureHoldEvent, GesturePinchEvent, GestureSwipeEvent},
+        Event, GestureEvent,
+    },
     ffi::{
-        libinput_event_gesture_get_cancelled, libinput_event_gesture_get_dx_unaccelerated,
-        libinput_event_gesture_get_dy_unaccelerated, libinput_event_gesture_get_finger_count,
+        libinput_event_gesture_get_angle_delta, libinput_event_gesture_get_cancelled,
+        libinput_event_gesture_get_dx_unaccelerated, libinput_event_gesture_get_dy_unaccelerated,
+        libinput_event_gesture_get_finger_count, libinput_event_gesture_get_scale,
         libinput_event_gesture_get_time,
     },
     Libinput, LibinputInterface,
@@ -37,9 +39,19 @@ pub struct CustomHoldEvent {
     pub is_cancelled: bool,
 }
 
+#[derive(Debug, Deserialize, Serialize, Type)]
+pub struct CustomPinchEvent {
+    pub stage: String,
+    pub fingers: i32,
+    pub angle_delta: f64,
+    pub scale: f64,
+    pub time: u32,
+}
+
 pub enum CustomGestureEvent {
     Swipe(CustomSwipeEvent),
     Hold(CustomHoldEvent),
+    Pinch(CustomPinchEvent),
 }
 
 struct Interface;
@@ -124,6 +136,40 @@ pub fn handle_hold(hold: GestureHoldEvent, transmitter: &mpsc::Sender<CustomGest
     transmitter.send(CustomGestureEvent::Hold(hold)).unwrap();
 }
 
+fn handle_pinch(pinch: GesturePinchEvent, transmitter: &mpsc::Sender<CustomGestureEvent>) {
+    let stage = match &pinch {
+        GesturePinchEvent::Begin(_) => "Begin",
+        GesturePinchEvent::Update(_) => "Update",
+        GesturePinchEvent::End(_) => "End",
+        _ => panic!("Unkown gesture event {:?}", pinch),
+    };
+
+    let (fingers, angle_delta, scale, time) = unsafe {
+        let raw_gesture_event = input::AsRaw::as_raw_mut(&pinch);
+        (
+            libinput_event_gesture_get_finger_count(raw_gesture_event),
+            libinput_event_gesture_get_angle_delta(raw_gesture_event),
+            libinput_event_gesture_get_scale(raw_gesture_event),
+            libinput_event_gesture_get_time(raw_gesture_event),
+        )
+    };
+
+    // only send >= 3 finger pinch gestures
+    if fingers < 3 {
+        return;
+    }
+
+    let pinch = CustomPinchEvent {
+        stage: stage.into(),
+        fingers,
+        angle_delta,
+        scale,
+        time,
+    };
+
+    transmitter.send(CustomGestureEvent::Pinch(pinch)).unwrap();
+}
+
 pub fn libinput_listener(transmitter: mpsc::Sender<CustomGestureEvent>) {
     let mut input = Libinput::new_with_udev(Interface);
 
@@ -153,6 +199,7 @@ pub fn libinput_listener(transmitter: mpsc::Sender<CustomGestureEvent>) {
                 match gesture_event {
                     GestureEvent::Hold(hold) => handle_hold(hold, &transmitter),
                     GestureEvent::Swipe(swipe) => handle_swipe(swipe, &transmitter),
+                    GestureEvent::Pinch(pinch) => handle_pinch(pinch, &transmitter),
                     _ => {}
                 }
             }
