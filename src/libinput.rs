@@ -2,16 +2,19 @@ use std::{
     fs::{File, OpenOptions},
     os::unix::prelude::{AsRawFd, FromRawFd, IntoRawFd, OpenOptionsExt, RawFd},
     path::Path,
-    sync::{mpsc},
+    sync::mpsc,
 };
 
 use input::{
-    event::gesture::GestureSwipeEvent,
-    event::Event,
-    event::GestureEvent,
+    event::{
+        gesture::{GestureHoldEvent, GesturePinchEvent, GestureSwipeEvent},
+        Event, GestureEvent,
+    },
     ffi::{
+        libinput_event_gesture_get_angle_delta, libinput_event_gesture_get_cancelled,
         libinput_event_gesture_get_dx_unaccelerated, libinput_event_gesture_get_dy_unaccelerated,
-        libinput_event_gesture_get_finger_count, libinput_event_gesture_get_time,
+        libinput_event_gesture_get_finger_count, libinput_event_gesture_get_scale,
+        libinput_event_gesture_get_time,
     },
     Libinput, LibinputInterface,
 };
@@ -20,7 +23,7 @@ use serde::{Deserialize, Serialize};
 use zvariant::derive::Type;
 
 #[derive(Debug, Deserialize, Serialize, Type)]
-pub struct CustonSwipeEvent {
+pub struct CustomSwipeEvent {
     pub stage: String,
     pub fingers: i32,
     pub dx: f64,
@@ -28,9 +31,33 @@ pub struct CustonSwipeEvent {
     pub time: u32,
 }
 
+#[derive(Debug, Deserialize, Serialize, Type)]
+pub struct CustomHoldEvent {
+    pub stage: String,
+    pub fingers: i32,
+    pub time: u32,
+    pub is_cancelled: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize, Type)]
+pub struct CustomPinchEvent {
+    pub stage: String,
+    pub fingers: i32,
+    pub angle_delta: f64,
+    pub scale: f64,
+    pub time: u32,
+}
+
+pub enum CustomGestureEvent {
+    Swipe(CustomSwipeEvent),
+    Hold(CustomHoldEvent),
+    Pinch(CustomPinchEvent),
+}
+
 struct Interface;
 
 impl LibinputInterface for Interface {
+    #[allow(clippy::bad_bit_mask)]
     fn open_restricted(&mut self, path: &Path, flags: i32) -> Result<RawFd, i32> {
         OpenOptions::new()
             .custom_flags(flags)
@@ -47,7 +74,103 @@ impl LibinputInterface for Interface {
     }
 }
 
-pub fn libinput_listener(transmitter: mpsc::Sender<CustonSwipeEvent>) {
+pub fn handle_swipe(swipe: GestureSwipeEvent, transmitter: &mpsc::Sender<CustomGestureEvent>) {
+    let stage = match &swipe {
+        GestureSwipeEvent::Begin(_) => "Begin",
+        GestureSwipeEvent::Update(_) => "Update",
+        GestureSwipeEvent::End(_) => "End",
+        _ => panic!("Unkown gesture event {:?}", swipe),
+    };
+
+    let (fingers, dx, dy, time) = unsafe {
+        let raw_gesture_event = input::AsRaw::as_raw_mut(&swipe);
+        (
+            libinput_event_gesture_get_finger_count(raw_gesture_event),
+            libinput_event_gesture_get_dx_unaccelerated(raw_gesture_event),
+            libinput_event_gesture_get_dy_unaccelerated(raw_gesture_event),
+            libinput_event_gesture_get_time(raw_gesture_event),
+        )
+    };
+
+    let swipe = CustomSwipeEvent {
+        stage: stage.into(),
+        fingers,
+        dx,
+        dy,
+        time,
+    };
+
+    transmitter.send(CustomGestureEvent::Swipe(swipe)).unwrap();
+}
+
+pub fn handle_hold(hold: GestureHoldEvent, transmitter: &mpsc::Sender<CustomGestureEvent>) {
+    let stage = match &hold {
+        GestureHoldEvent::Begin(_) => "Begin",
+        GestureHoldEvent::End(_) => "End",
+        _ => panic!("Unkown gesture event {:?}", hold),
+    };
+
+    let (fingers, time, is_cancelled) = unsafe {
+        let raw_gesture_event = input::AsRaw::as_raw_mut(&hold);
+        (
+            libinput_event_gesture_get_finger_count(raw_gesture_event),
+            libinput_event_gesture_get_time(raw_gesture_event),
+            // calling libinput_event_gesture_get_cancelled on begin gesture in error
+            matches!(hold, GestureHoldEvent::End(_))
+                && libinput_event_gesture_get_cancelled(raw_gesture_event) != 0,
+        )
+    };
+
+    // only send >= 3 finger hold gestures
+    if fingers < 3 {
+        return;
+    }
+
+    let hold = CustomHoldEvent {
+        stage: stage.into(),
+        fingers,
+        time,
+        is_cancelled,
+    };
+
+    transmitter.send(CustomGestureEvent::Hold(hold)).unwrap();
+}
+
+fn handle_pinch(pinch: GesturePinchEvent, transmitter: &mpsc::Sender<CustomGestureEvent>) {
+    let stage = match &pinch {
+        GesturePinchEvent::Begin(_) => "Begin",
+        GesturePinchEvent::Update(_) => "Update",
+        GesturePinchEvent::End(_) => "End",
+        _ => panic!("Unkown gesture event {:?}", pinch),
+    };
+
+    let (fingers, angle_delta, scale, time) = unsafe {
+        let raw_gesture_event = input::AsRaw::as_raw_mut(&pinch);
+        (
+            libinput_event_gesture_get_finger_count(raw_gesture_event),
+            libinput_event_gesture_get_angle_delta(raw_gesture_event),
+            libinput_event_gesture_get_scale(raw_gesture_event),
+            libinput_event_gesture_get_time(raw_gesture_event),
+        )
+    };
+
+    // only send >= 3 finger pinch gestures
+    if fingers < 3 {
+        return;
+    }
+
+    let pinch = CustomPinchEvent {
+        stage: stage.into(),
+        fingers,
+        angle_delta,
+        scale,
+        time,
+    };
+
+    transmitter.send(CustomGestureEvent::Pinch(pinch)).unwrap();
+}
+
+pub fn libinput_listener(transmitter: mpsc::Sender<CustomGestureEvent>) {
     let mut input = Libinput::new_with_udev(Interface);
 
     input.udev_assign_seat("seat0").unwrap();
@@ -72,38 +195,12 @@ pub fn libinput_listener(transmitter: mpsc::Sender<CustonSwipeEvent>) {
                 break;
             }
 
-            if let Event::Gesture(GestureEvent::Swipe(swipe)) = event.unwrap() {
-                let stage = match &swipe {
-                    GestureSwipeEvent::Begin(_) => "Begin",
-                    GestureSwipeEvent::Update(_) => "Update",
-                    GestureSwipeEvent::End(_) => "End",
-                    _ => panic!("Unkown gesture event {:?}", swipe),
-                };
-
-                let fingers;
-                let dx;
-                let dy;
-                let time;
-
-                unsafe {
-                    let zz = input::AsRaw::as_raw_mut(&swipe);
-                    fingers = libinput_event_gesture_get_finger_count(zz);
-                    dx = libinput_event_gesture_get_dx_unaccelerated(zz);
-                    dy = libinput_event_gesture_get_dy_unaccelerated(zz);
-                    time = libinput_event_gesture_get_time(zz);
-                }
-                {
-                    // println!("fingers: {}, dx: {}, dy: {}", fingers, dx, dy);
-
-                    transmitter
-                        .send(CustonSwipeEvent {
-                            stage: stage.into(),
-                            fingers,
-                            dx,
-                            dy,
-                            time,
-                        })
-                        .unwrap();
+            if let Event::Gesture(gesture_event) = event.unwrap() {
+                match gesture_event {
+                    GestureEvent::Hold(hold) => handle_hold(hold, &transmitter),
+                    GestureEvent::Swipe(swipe) => handle_swipe(swipe, &transmitter),
+                    GestureEvent::Pinch(pinch) => handle_pinch(pinch, &transmitter),
+                    _ => {}
                 }
             }
         }

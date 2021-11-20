@@ -12,10 +12,51 @@ struct Greeter {}
 #[dbus_interface(name = "org.gestureImprovements.gestures")]
 impl Greeter {
     #[dbus_interface(signal)]
-    fn touchpad_swipe(&self, event: &libinput::CustonSwipeEvent) -> zbus::Result<()>;
+    fn touchpad_swipe(&self, event: &libinput::CustomSwipeEvent) -> zbus::Result<()>;
+
+    #[dbus_interface(signal)]
+    fn touchpad_hold(&self, event: &libinput::CustomHoldEvent) -> zbus::Result<()>;
+
+    #[dbus_interface(signal)]
+    fn touchpad_pinch(&self, event: &libinput::CustomPinchEvent) -> zbus::Result<()>;
+
+    fn get_version(&mut self) -> String {
+        const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
+        VERSION.unwrap_or("unknown").into()
+    }
+}
+
+fn display_info(arguments: Vec<String>) {
+    const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
+    const COMMIT: Option<&'static str> = option_env!("GIT_HEAD_SHA");
+
+    match arguments[1].as_str() {
+        "--version" => {
+            println!("version: {}", VERSION.unwrap_or("unknown"));
+            if let Some(commit) = COMMIT {
+                println!("commit: {}", commit)
+            }
+        }
+
+        _ => {
+            println!(
+                "Unknown argument: {:}\n\
+                Supported arguments:\n\
+                 \t--version\tdisplay version information\n\
+                \nRun without arguments to start dbus service",
+                &arguments[1 .. arguments.len()].join(" ")
+            );
+        }
+    }
 }
 
 fn main() {
+    let arguments: Vec<String> = std::env::args().collect();
+    if arguments.len() > 1 {
+        display_info(arguments);
+        return;
+    }
+
     let (transmitter, reciever) = mpsc::channel();
 
     let connection = zbus::Connection::new_session().unwrap();
@@ -57,11 +98,11 @@ fn main() {
 
         match msg {
             Ok(msg) => {
-                // println!("greeted everyone!, {:?}", msg);
                 object_server
-                    .with(path, move |iface: &Greeter| {
-                        iface.touchpad_swipe(&msg).unwrap();
-                        return Ok(());
+                    .with(path, move |iface: &Greeter| match &msg {
+                        libinput::CustomGestureEvent::Hold(hold) => iface.touchpad_hold(hold),
+                        libinput::CustomGestureEvent::Swipe(swipe) => iface.touchpad_swipe(swipe),
+                        libinput::CustomGestureEvent::Pinch(pinch) => iface.touchpad_pinch(pinch),
                     })
                     .unwrap();
                 msg_recv += 1;
