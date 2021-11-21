@@ -11,7 +11,7 @@ grep -E '^input:' /usr/lib/group | sudo tee -a /etc/group
 sudo usermod -aG input $USER
 ```
 
-### **From releases (Recommended)**
+### **From releases**
 - Download zip file from [releases](https://github.com/harshadgavali/gnome-x11-gesture-daemon/releases)
 - Extract zip file
 - Inside extracted folder, Run 
@@ -22,6 +22,13 @@ sh install.sh # Reboot is needed after this
 # ** OR ** to restart daemon, without rebooting
 sh install.sh --restart
 
+```
+
+### Distributions
+
+* Arch Linux/Manjaro Linux - [gnome-x11-gesture-daemon](https://aur.archlinux.org/packages/gnome-x11-gesture-daemon) Thanks to @[yochananmarqos](https://github.com/yochananmarqos)
+```code
+yay -S gnome-x11-gesture-daemon
 ```
 
 ### Build from source

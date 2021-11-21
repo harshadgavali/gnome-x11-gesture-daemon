@@ -1,6 +1,6 @@
 [package]
 name = "gesture_improvements_gesture_daemon"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Harshad Gavali <harshadgavali@outlook.com>"]
 edition = "2018"
 

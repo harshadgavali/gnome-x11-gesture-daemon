@@ -218,7 +218,7 @@ dependencies = [
 
 [[package]]
 name = "gesture_improvements_gesture_daemon"
-version = "0.1.3"
+version = "0.2.1"
 dependencies = [
  "input",
  "libc",
