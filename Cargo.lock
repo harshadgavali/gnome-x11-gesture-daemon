@@ -229,9 +229,9 @@ dependencies = [
 
 [[package]]
 name = "input"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc4dbb162fb850a9896d078e2ffd9a513e6eb7224b5af425f24d717c7e970170"
+checksum = "f95640ef27dac9b23ef1fbd760c67a88ce3cab2143a2c18390e71f39c53b815f"
 dependencies = [
  "bitflags",
  "input-sys",
@@ -242,9 +242,9 @@ dependencies = [
 
 [[package]]
 name = "input-sys"
-version = "1.16.0"
+version = "1.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56c19467c5dd7d0cd50c3feec490b102e97be9728bdd46405bbc02880291ca73"
+checksum = "e09d849da95ebb5d091c600f6cdae5193077995f1e9095c16a5bb4f84b561933"
 dependencies = [
  "libc",
 ]
