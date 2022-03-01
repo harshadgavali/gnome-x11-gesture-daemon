@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 input = "0.7"
-libc = "0.2.107"
+libc = "0.2.119"
 zbus = "1.9"
 zvariant = "2.9"
 serde = "1.0.130"
