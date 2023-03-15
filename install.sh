@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ $(id --user) -eq 0 ]; then
+    echo "Please install without sudo or root!"
+    exit 1
+fi
+
 echo "Installing ..."
 mkdir -vp ~/.config/systemd/user ~/.local/bin
 cp -vf gesture_improvements_gesture_daemon.service ~/.config/systemd/user
