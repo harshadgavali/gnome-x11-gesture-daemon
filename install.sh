@@ -1,7 +1,6 @@
 #!/bin/sh
 
 echo "Installing ..."
-sed -i "s#@HOME#${HOME}#g" gesture_improvements_gesture_daemon.service
 mkdir -vp ~/.config/systemd/user ~/.local/bin
 cp -vf gesture_improvements_gesture_daemon.service ~/.config/systemd/user
 cp -vf target/release/gesture_improvements_gesture_daemon ~/.local/bin
@@ -22,3 +21,4 @@ else
 fi
 
 echo "Service will be automatically started by extension."
+

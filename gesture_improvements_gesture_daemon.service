@@ -5,6 +5,7 @@ StartLimitInterval=0
 
 [Service]
 Type=simple
-ExecStart=@HOME/.local/bin/gesture_improvements_gesture_daemon
+ExecStart=%h/.local/bin/gesture_improvements_gesture_daemon
 Restart=always
 RestartSec=1s
+
