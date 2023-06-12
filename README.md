@@ -42,10 +42,10 @@ make build-docker && make install
 * First install build dependencies
 ```
 # dnf/rpm based distributions
-sudo dnf install libinput-devel
+sudo dnf install libinput-devel cargo rust-libudev-sys-devel
 
 # apt/deb based distributions
-sudo apt install libinput-dev
+sudo apt install libinput-dev cargo librust-libudev-sys-dev
 ```
 * Then build and install
 ```
